@@ -2,12 +2,12 @@
 
 namespace SubKit\Filament\Resources;
 
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use SubKit\Filament\Resources\FeatureResource\Pages;
@@ -29,9 +29,9 @@ class FeatureResource extends Resource
     // Form
     // -------------------------------------------------------------------------
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema([
+        return $schema->schema([
             TextInput::make('name')
                 ->label('Name')
                 ->required()
