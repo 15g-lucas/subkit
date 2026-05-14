@@ -40,6 +40,12 @@ class SubscriptionService
             ?? throw new RuntimeException("Plan [{$planCode}] has no price for provider [{$provider}].");
 
         $user = $userId ? $this->user($userId) : null;
+        $resolvedQuantity = $plan->has_quantity ? max(1, $quantity) : 1;
+
+        if (($plan->installation_fee ?? 0) > 0) {
+            $options['installation_fee'] = (int) $plan->installation_fee;
+            $options['installation_fee_label'] = "Installation fee ({$plan->name})";
+        }
 
         return $this->registry->resolve($provider)->createCheckoutSession(
             user: $user,
@@ -47,7 +53,7 @@ class SubscriptionService
             successUrl: $successUrl,
             cancelUrl: $cancelUrl,
             trialDays: $plan->trial_days,
-            quantity: $quantity,
+            quantity: $resolvedQuantity,
             options: $options,
         );
     }

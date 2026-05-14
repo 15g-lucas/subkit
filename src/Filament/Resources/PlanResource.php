@@ -85,6 +85,16 @@ class PlanResource extends Resource
                         ->formatStateUsing(fn (?int $state): ?string => $state ? number_format($state / 100, 2) : null)
                         ->dehydrateStateUsing(fn (?string $state): ?int => filled($state) ? (int) round((float) $state * 100) : null),
 
+                    TextInput::make('installation_fee')
+                        ->label('Installation fee')
+                        ->numeric()
+                        ->minValue(0)
+                        ->prefix(config('subkit.currency.symbol', '$'))
+                        ->placeholder('99.00')
+                        ->helperText('One-time setup fee charged at subscription start.')
+                        ->formatStateUsing(fn (?int $state): ?string => $state ? number_format($state / 100, 2) : null)
+                        ->dehydrateStateUsing(fn (?string $state): ?int => filled($state) ? (int) round((float) $state * 100) : null),
+
                     TextInput::make('version')
                         ->label('Version')
                         ->numeric()
@@ -147,6 +157,14 @@ class PlanResource extends Resource
                     ->formatStateUsing(fn (?int $state): string => $state
                         ? config('subkit.currency.symbol', '$').number_format($state / 100, 2)
                         : 'Free'
+                    ),
+
+                TextColumn::make('installation_fee')
+                    ->label('Installation fee')
+                    ->placeholder('—')
+                    ->formatStateUsing(fn (?int $state): ?string => $state !== null
+                        ? config('subkit.currency.symbol', '$').number_format($state / 100, 2)
+                        : null
                     ),
 
                 TextColumn::make('version')

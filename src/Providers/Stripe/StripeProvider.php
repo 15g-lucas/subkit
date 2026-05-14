@@ -23,25 +23,25 @@ class StripeProvider implements PaymentProviderContract
         int $quantity = 1,
         array $options = [],
     ): string {
+        $installationFee = (int) ($options['installation_fee'] ?? 0);
+        $installationFeeLabel = (string) ($options['installation_fee_label'] ?? 'Installation fee');
+        unset($options['installation_fee'], $options['installation_fee_label']);
+
         if (! $user) {
             $secret = (string) config('cashier.secret');
             if ($secret === '') {
                 throw new RuntimeException('Missing Stripe secret key for guest checkout.');
             }
 
-            $payload = [
-                'mode' => 'subscription',
-                'line_items' => [[
-                    'price' => $priceId,
-                    'quantity' => 1,
-                ]],
-                'success_url' => $successUrl,
-                'cancel_url' => $cancelUrl,
-            ];
-
-            if ($trialDays !== null && $trialDays > 0) {
-                $payload['subscription_data'] = ['trial_period_days' => $trialDays];
-            }
+            $payload = $this->guestPayload(
+                priceId: $priceId,
+                successUrl: $successUrl,
+                cancelUrl: $cancelUrl,
+                trialDays: $trialDays,
+                quantity: $quantity,
+                installationFee: $installationFee,
+                installationFeeLabel: $installationFeeLabel,
+            );
 
             $session = (new StripeClient($secret))
                 ->checkout
@@ -61,10 +61,73 @@ class StripeProvider implements PaymentProviderContract
             $builder->quantity($quantity);
         }
 
-        return $builder->checkout(array_merge([
+        $checkoutPayload = [
             'success_url' => $successUrl,
             'cancel_url' => $cancelUrl,
-        ], $options))->url;
+        ];
+
+        if ($installationFee > 0) {
+            $checkoutPayload['subscription_data'] = [
+                'add_invoice_items' => [[
+                    'price_data' => [
+                        'currency' => strtolower((string) config('subkit.currency.code', 'USD')),
+                        'unit_amount' => $installationFee,
+                        'product_data' => [
+                            'name' => $installationFeeLabel,
+                        ],
+                    ],
+                ]],
+            ];
+        }
+
+        return $builder->checkout(array_merge($checkoutPayload, $options))->url;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function guestPayload(
+        string $priceId,
+        string $successUrl,
+        string $cancelUrl,
+        ?int $trialDays,
+        int $quantity,
+        int $installationFee,
+        string $installationFeeLabel,
+    ): array {
+        $payload = [
+            'mode' => 'subscription',
+            'line_items' => [[
+                'price' => $priceId,
+                'quantity' => max(1, $quantity),
+            ]],
+            'success_url' => $successUrl,
+            'cancel_url' => $cancelUrl,
+        ];
+
+        $subscriptionData = [];
+
+        if ($trialDays !== null && $trialDays > 0) {
+            $subscriptionData['trial_period_days'] = $trialDays;
+        }
+
+        if ($installationFee > 0) {
+            $subscriptionData['add_invoice_items'] = [[
+                'price_data' => [
+                    'currency' => strtolower((string) config('subkit.currency.code', 'USD')),
+                    'unit_amount' => $installationFee,
+                    'product_data' => [
+                        'name' => $installationFeeLabel,
+                    ],
+                ],
+            ]];
+        }
+
+        if ($subscriptionData !== []) {
+            $payload['subscription_data'] = $subscriptionData;
+        }
+
+        return $payload;
     }
 
     public function cancelSubscription(Model $user, bool $immediately = false): void
