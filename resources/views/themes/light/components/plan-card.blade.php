@@ -156,6 +156,22 @@
                     @if ($companyId)
                         <input type="hidden" name="company_id" value="{{ $companyId }}">
                     @endif
+                    @if ($plan->has_quantity)
+                        <div class="mb-4 flex items-center gap-3">
+                            <label for="qty_guest_{{ $plan->code }}" class="text-sm font-medium text-gray-700">
+                                {{ __('subkit::messages.pricing.quantity') }}
+                            </label>
+                            <input
+                                id="qty_guest_{{ $plan->code }}"
+                                type="number"
+                                name="quantity"
+                                x-model.number="qty"
+                                min="1"
+                                value="1"
+                                class="w-20 rounded-lg border border-gray-300 px-3 py-1.5 text-center text-sm font-semibold text-gray-900 shadow-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                            >
+                        </div>
+                    @endif
                     <button
                         type="{{ $successUrl === '#' ? 'button' : 'submit' }}"
                         class="w-full rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition
