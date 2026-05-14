@@ -113,7 +113,9 @@ class User extends Authenticatable
 
 ### 1. Create plans in the admin panel
 
-Navigate to your Filament admin panel (usually `/admin`) → **Plans** → Create a plan. After creating a plan, add a Stripe Price ID in the **Provider Prices** tab on the plan edit page.
+Navigate to your Filament admin panel (usually `/admin`) → **Plans** → Create a plan.  
+You can enable **Quantity-based** billing and set an optional **Installation fee** (one-time charge at subscription start).  
+After creating a plan, add a Stripe Price ID in the **Provider Prices** tab on the plan edit page.
 
 ### 2. Register the Stripe webhook
 

@@ -16,6 +16,7 @@ use SubKit\Enums\SubscriptionInterval;
  * @property SubscriptionInterval $interval
  * @property int|null $trial_days
  * @property int|null $price
+ * @property int|null $installation_fee
  * @property bool $has_quantity
  * @property bool $is_active
  * @property int $version
@@ -33,6 +34,7 @@ class Plan extends Model
         'interval',
         'trial_days',
         'price',
+        'installation_fee',
         'has_quantity',
         'is_active',
         'version',
@@ -45,6 +47,7 @@ class Plan extends Model
             'interval' => SubscriptionInterval::class,
             'trial_days' => 'integer',
             'price' => 'integer',
+            'installation_fee' => 'integer',
             'has_quantity' => 'boolean',
             'is_active' => 'boolean',
             'version' => 'integer',
