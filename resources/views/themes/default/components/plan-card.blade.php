@@ -35,7 +35,7 @@
             <span class="pb-1 text-sm font-medium tracking-wide text-slate-500">
                 @if ($plan->has_quantity)
                     {{ $plan->interval->value === 'yearly' ? __('subkit::messages.pricing.per_year') : __('subkit::messages.pricing.per_month') }}
-                    /{{ __('subkit::messages.pricing.per_user') }}
+                    / {{ __('subkit::messages.pricing.per_user') }}
                 @else
                     / {{ $plan->interval->value }}
                 @endif
