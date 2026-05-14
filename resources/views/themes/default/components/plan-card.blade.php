@@ -23,7 +23,7 @@
     {{-- Price --}}
     <div class="mt-5 flex items-end gap-2">
         @if ($plan->has_quantity)
-            <p class="text-5xl font-black leading-none tracking-[-0.02em] text-slate-900" x-text="qty > 0 ? '{{ config('subkit.currency.symbol', '$') }}' + (qty * {{ $plan->price ?? 0 }} / 100).toFixed(2) : '{{ $plan->formatted_price }}'">
+            <p class="text-5xl font-black leading-none tracking-[-0.02em] text-slate-900" x-text="'{{ config('subkit.currency.symbol', '$') }}' + (qty * {{ $plan->price ?? 0 }} / 100).toFixed(2)">
                 {{ $plan->formatted_price }}
             </p>
         @else

@@ -18,7 +18,7 @@
     {{-- Price --}}
     <p class="mt-2 text-3xl font-bold text-white">
         @if ($plan->has_quantity)
-            <span x-text="qty > 0 ? '{{ config('subkit.currency.symbol', '$') }}' + (qty * {{ $plan->price ?? 0 }} / 100).toFixed(2) : '{{ $plan->formatted_price }}'">{{ $plan->formatted_price }}</span>
+            <span x-text="'{{ config('subkit.currency.symbol', '$') }}' + (qty * {{ $plan->price ?? 0 }} / 100).toFixed(2)">{{ $plan->formatted_price }}</span>
         @else
             {{ $plan->formatted_price }}
         @endif
