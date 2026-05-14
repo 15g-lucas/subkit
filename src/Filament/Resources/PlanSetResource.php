@@ -25,11 +25,11 @@ class PlanSetResource extends Resource
 {
     protected static ?string $model = PlanSet::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-table-cells';
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-table-cells';
 
     protected static ?string $navigationLabel = 'Plan Sets';
 
-    protected static ?string $navigationGroup = 'Subscriptions';
+    protected static string|null|\UnitEnum $navigationGroup = 'Abonnement';
 
     protected static ?int $navigationSort = 1;
 

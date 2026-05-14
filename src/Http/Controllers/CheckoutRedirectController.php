@@ -31,7 +31,7 @@ class CheckoutRedirectController extends Controller
 
         $url = $this->service->checkout(
             planCode: $data['plan_code'],
-            userId: (string) $request->user()->id,
+            userId: (string) $request->user()->getKey(),
             successUrl: $data['success_url'],
             cancelUrl: $data['cancel_url'],
             provider: $data['provider'] ?? 'stripe',

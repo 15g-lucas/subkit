@@ -2,7 +2,7 @@
 
 namespace SubKit\Listeners;
 
-use App\Models\User;
+use Functional\Users\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Cashier\Events\WebhookHandled;
 use Laravel\Cashier\Subscription as CashierSubscription;

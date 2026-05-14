@@ -17,11 +17,11 @@ class SubscriberResource extends Resource
 {
     protected static ?string $model = CashierSubscription::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-users';
 
     protected static ?string $navigationLabel = 'Subscribers';
 
-    protected static ?string $navigationGroup = 'Subscriptions';
+    protected static string|null|\UnitEnum $navigationGroup = 'Abonnement';
 
     protected static ?int $navigationSort = 0;
 

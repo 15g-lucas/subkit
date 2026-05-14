@@ -2,7 +2,7 @@
 
 namespace SubKit\Services;
 
-use App\Models\User;
+use Functional\Users\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Cashier\Subscription as CashierSubscription;
@@ -32,6 +32,7 @@ class SubscriptionService
         string $provider = 'stripe',
         array $options = [],
     ): string {
+
         $plan = Plan::where('code', $planCode)->where('is_active', true)->firstOrFail();
 
         $providerPrice = $plan->providerPrice($provider)
