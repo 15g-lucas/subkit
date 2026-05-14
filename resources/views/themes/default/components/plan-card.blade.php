@@ -33,10 +33,23 @@
         @endif
         @if ($plan->price)
             <span class="pb-1 text-sm font-medium tracking-wide text-slate-500">
-                / {{ $plan->interval->value }}
+                @if ($plan->has_quantity)
+                    {{ $plan->interval->value === 'yearly' ? __('subkit::messages.pricing.per_year') : __('subkit::messages.pricing.per_month') }}
+                    /{{ __('subkit::messages.pricing.per_user') }}
+                @else
+                    / {{ $plan->interval->value }}
+                @endif
             </span>
         @endif
     </div>
+
+    @if (($plan->installation_fee ?? 0) > 0)
+        <p class="mt-2 text-xs font-semibold tracking-wide text-slate-500">
+            {{ __('subkit::messages.pricing.installation_fee') }}:
+            {{ config('subkit.currency.symbol', '$') }}{{ number_format(($plan->installation_fee ?? 0) / 100, 2) }}
+            ({{ __('subkit::messages.pricing.one_time') }})
+        </p>
+    @endif
 
         {{-- Description --}}
         @if ($plan->description)
