@@ -1,4 +1,6 @@
-<div class="relative flex flex-col rounded-2xl border shadow-sm
+<div
+    @if ($plan->has_quantity) x-data="{ qty: 1 }" @endif
+    class="relative flex flex-col rounded-2xl border shadow-sm
     {{ $highlighted ? 'border-indigo-400 ring-2 ring-indigo-400 bg-gray-800' : 'border-gray-700 bg-gray-800' }}
     p-6">
 
@@ -15,7 +17,11 @@
 
     {{-- Price --}}
     <p class="mt-2 text-3xl font-bold text-white">
-        {{ $plan->formatted_price }}
+        @if ($plan->has_quantity)
+            <span x-text="'{{ config('subkit.currency.symbol', '$') }}' + (qty * {{ $plan->price ?? 0 }} / 100).toFixed(2)">{{ $plan->formatted_price }}</span>
+        @else
+            {{ $plan->formatted_price }}
+        @endif
         @if ($plan->price)
             <span class="text-sm font-normal text-gray-400">/ {{ $plan->interval->value }}</span>
         @endif
@@ -105,6 +111,22 @@
                 <input type="hidden" name="cancel_url"   value="{{ $cancelUrl }}">
                 @if ($companyId)
                     <input type="hidden" name="company_id" value="{{ $companyId }}">
+                @endif
+                @if ($plan->has_quantity)
+                    <div class="mb-4 flex items-center gap-3">
+                        <label for="qty_{{ $plan->code }}" class="text-sm font-medium text-gray-300">
+                            {{ __('subkit::messages.pricing.quantity') }}
+                        </label>
+                        <input
+                            id="qty_{{ $plan->code }}"
+                            type="number"
+                            name="quantity"
+                            x-model.number="qty"
+                            min="1"
+                            value="1"
+                            class="w-20 rounded-lg border border-gray-600 bg-gray-700 px-3 py-1.5 text-center text-sm font-semibold text-white shadow-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        >
+                    </div>
                 @endif
                 <button
                     type="{{ $successUrl === '#' ? 'button' : 'submit' }}"

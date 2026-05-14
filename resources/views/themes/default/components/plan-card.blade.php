@@ -1,4 +1,5 @@
 <article
+    @if ($plan->has_quantity) x-data="{ qty: 1 }" @endif
     class="group relative flex flex-col overflow-hidden rounded-3xl border p-7 transition-all duration-300
         {{ $highlighted
             ? 'border-indigo-300/70 bg-white shadow-[0_16px_45px_rgba(99,102,241,0.20),0_2px_10px_rgba(15,23,42,0.06)] hover:-translate-y-1 hover:shadow-[0_22px_55px_rgba(99,102,241,0.28),0_4px_14px_rgba(15,23,42,0.08)]'
@@ -19,17 +20,23 @@
         {{-- Plan name --}}
         <h3 class="text-lg font-semibold tracking-wide text-slate-900">{{ $plan->name }}</h3>
 
-        {{-- Price --}}
-        <div class="mt-5 flex items-end gap-2">
+    {{-- Price --}}
+    <div class="mt-5 flex items-end gap-2">
+        @if ($plan->has_quantity)
+            <p class="text-5xl font-black leading-none tracking-[-0.02em] text-slate-900" x-text="'{{ config('subkit.currency.symbol', '$') }}' + (qty * {{ $plan->price ?? 0 }} / 100).toFixed(2)">
+                {{ $plan->formatted_price }}
+            </p>
+        @else
             <p class="text-5xl font-black leading-none tracking-[-0.02em] text-slate-900">
                 {{ $plan->formatted_price }}
             </p>
-            @if ($plan->price)
-                <span class="pb-1 text-sm font-medium tracking-wide text-slate-500">
-                    / {{ $plan->interval->value }}
-                </span>
-            @endif
-        </div>
+        @endif
+        @if ($plan->price)
+            <span class="pb-1 text-sm font-medium tracking-wide text-slate-500">
+                / {{ $plan->interval->value }}
+            </span>
+        @endif
+    </div>
 
         {{-- Description --}}
         @if ($plan->description)
@@ -121,6 +128,22 @@
                         <input type="hidden" name="cancel_url"  value="{{ $cancelUrl }}">
                         @if ($companyId)
                             <input type="hidden" name="company_id" value="{{ $companyId }}">
+                        @endif
+                        @if ($plan->has_quantity)
+                            <div class="mb-4 flex items-center gap-3">
+                                <label for="qty_{{ $plan->code }}" class="text-sm font-medium tracking-wide text-slate-700">
+                                    {{ __('subkit::messages.pricing.quantity') }}
+                                </label>
+                                <input
+                                    id="qty_{{ $plan->code }}"
+                                    type="number"
+                                    name="quantity"
+                                    x-model.number="qty"
+                                    min="1"
+                                    value="1"
+                                    class="w-20 rounded-lg border border-slate-200 px-3 py-1.5 text-center text-sm font-semibold text-slate-900 shadow-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                                >
+                            </div>
                         @endif
                         <button
                             type="{{ $successUrl === '#' ? 'button' : 'submit' }}"

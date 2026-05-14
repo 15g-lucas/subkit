@@ -30,6 +30,7 @@ class SubscriptionService
         string $successUrl,
         string $cancelUrl,
         string $provider = 'stripe',
+        int $quantity = 1,
         array $options = [],
     ): string {
 
@@ -46,6 +47,7 @@ class SubscriptionService
             successUrl: $successUrl,
             cancelUrl: $cancelUrl,
             trialDays: $plan->trial_days,
+            quantity: $quantity,
             options: $options,
         );
     }

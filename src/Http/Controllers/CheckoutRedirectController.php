@@ -27,6 +27,7 @@ class CheckoutRedirectController extends Controller
             'success_url' => ['required', 'string'],
             'cancel_url' => ['required', 'string'],
             'provider' => ['sometimes', 'string'],
+            'quantity' => ['sometimes', 'integer', 'min:1'],
         ]);
 
         $url = $this->service->checkout(
@@ -35,6 +36,7 @@ class CheckoutRedirectController extends Controller
             successUrl: $data['success_url'],
             cancelUrl: $data['cancel_url'],
             provider: $data['provider'] ?? 'stripe',
+            quantity: (int) ($data['quantity'] ?? 1),
         );
 
         return redirect()->away($url);
