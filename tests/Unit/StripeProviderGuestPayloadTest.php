@@ -87,15 +87,16 @@ class StripeProviderGuestPayloadTest extends TestCase
         $this->assertSame(14, $payload['subscription_data']['trial_period_days']);
         $this->assertSame(
             4500,
-            $payload['subscription_data']['add_invoice_items'][0]['price_data']['unit_amount']
+            $payload['line_items'][1]['price_data']['unit_amount']
         );
         $this->assertSame(
             'eur',
-            $payload['subscription_data']['add_invoice_items'][0]['price_data']['currency']
+            $payload['line_items'][1]['price_data']['currency']
         );
         $this->assertSame(
             'Setup fee',
-            $payload['subscription_data']['add_invoice_items'][0]['price_data']['product_data']['name']
+            $payload['line_items'][1]['price_data']['product_data']['name']
         );
+        $this->assertSame(1, $payload['line_items'][1]['quantity']);
     }
 }

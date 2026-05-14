@@ -67,16 +67,15 @@ class StripeProvider implements PaymentProviderContract
         ];
 
         if ($installationFee > 0) {
-            $checkoutPayload['subscription_data'] = [
-                'add_invoice_items' => [[
-                    'price_data' => [
-                        'currency' => strtolower((string) config('subkit.currency.code', 'USD')),
-                        'unit_amount' => $installationFee,
-                        'product_data' => [
-                            'name' => $installationFeeLabel,
-                        ],
+            $checkoutPayload['line_items'][] = [
+                'price_data' => [
+                    'currency' => strtolower((string) config('subkit.currency.code', 'USD')),
+                    'unit_amount' => $installationFee,
+                    'product_data' => [
+                        'name' => $installationFeeLabel,
                     ],
-                ]],
+                ],
+                'quantity' => 1,
             ];
         }
 
@@ -112,7 +111,7 @@ class StripeProvider implements PaymentProviderContract
         }
 
         if ($installationFee > 0) {
-            $subscriptionData['add_invoice_items'] = [[
+            $payload['line_items'][] = [
                 'price_data' => [
                     'currency' => strtolower((string) config('subkit.currency.code', 'USD')),
                     'unit_amount' => $installationFee,
@@ -120,7 +119,8 @@ class StripeProvider implements PaymentProviderContract
                         'name' => $installationFeeLabel,
                     ],
                 ],
-            ]];
+                'quantity' => 1,
+            ];
         }
 
         if ($subscriptionData !== []) {
