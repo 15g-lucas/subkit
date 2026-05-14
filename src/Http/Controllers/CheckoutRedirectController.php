@@ -19,8 +19,6 @@ class CheckoutRedirectController extends Controller
      */
     public function __invoke(Request $request): RedirectResponse
     {
-        abort_unless($request->user(), 401);
-
         $data = $request->validate([
             'plan_code' => ['required', 'string'],
             'company_id' => ['nullable', 'string'],
@@ -32,7 +30,7 @@ class CheckoutRedirectController extends Controller
 
         $url = $this->service->checkout(
             planCode: $data['plan_code'],
-            userId: (string) $request->user()->getKey(),
+            userId: $request->user()?->getKey() ? (string) $request->user()->getKey() : null,
             successUrl: $data['success_url'],
             cancelUrl: $data['cancel_url'],
             provider: $data['provider'] ?? 'stripe',

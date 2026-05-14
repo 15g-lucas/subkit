@@ -17,7 +17,7 @@ interface PaymentProviderContract
      * @param  array<string, mixed>  $options  Provider-specific overrides passed to the checkout builder.
      */
     public function createCheckoutSession(
-        Model $user,
+        ?Model $user,
         string $priceId,
         string $successUrl,
         string $cancelUrl,

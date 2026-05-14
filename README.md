@@ -167,7 +167,7 @@ With a plan set (for multiple landing pages or A/B testing):
 | `success-url` | `string` | `''` | Redirect after successful checkout. Accepts a route name, relative path, or full URL. |
 | `cancel-url` | `string` | `''` | Redirect when the user cancels checkout.                                              |
 | `free-url` | `string` | `''` | CTA destination for $0 plans (authenticated users).                                   |
-| `guest-redirect-url` | `string\|null` | `null` | Where unauthenticated visitors are sent. Defaults to `/register`.                     |
+| `guest-redirect-url` | `string\|null` | `null` | Where unauthenticated visitors are sent for free plans. Defaults to `/register`.       |
 | `company-id` | `string\|null` | `null` | For B2B: attaches the subscription to a company rather than a user.                   |
 | `subscribe-label` | `string\|null` | `null` | Override the "Get Started" button text.                                               |
 | `free-label` | `string\|null` | `null` | Override the "Get Started Free" button text.                                          |
@@ -178,6 +178,8 @@ URL props accept a **route name** (e.g. `'dashboard'`), a **relative path** (e.g
 For the best UX, point **Free Plan URL** to a route that automatically creates a $0 subscription for the authenticated user.
 
 Button labels follow a three-tier fallback: **Blade prop → Plan Set admin setting → translation string**.
+
+For paid plans, guests can start Stripe Checkout directly. SubKit creates or links the local user from the Stripe billing email when Stripe webhooks are received.
 
 ### Manage subscriptions
 

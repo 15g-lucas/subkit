@@ -39,7 +39,7 @@ class SubscriptionService
         $providerPrice = $plan->providerPrice($provider)
             ?? throw new RuntimeException("Plan [{$planCode}] has no price for provider [{$provider}].");
 
-        $user = $this->user($userId ?? throw new RuntimeException('A user ID is required for checkout.'));
+        $user = $userId ? $this->user($userId) : null;
 
         return $this->registry->resolve($provider)->createCheckoutSession(
             user: $user,

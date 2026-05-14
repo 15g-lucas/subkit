@@ -158,15 +158,37 @@
                 @endif
             @else
                 {{-- Guest --}}
-                <a
-                    href="{{ $guestUrl }}"
-                    class="block w-full rounded-xl px-4 py-3 text-center text-sm font-semibold tracking-wide text-white transition-all duration-300
-                        {{ $highlighted
-                            ? 'bg-gradient-to-r from-indigo-600 to-violet-600 shadow-[0_10px_24px_rgba(99,102,241,0.38)] hover:from-indigo-500 hover:to-violet-500 hover:shadow-[0_14px_28px_rgba(99,102,241,0.46)]'
-                            : 'bg-slate-900 shadow-[0_8px_20px_rgba(15,23,42,0.24)] hover:bg-slate-800 hover:shadow-[0_10px_24px_rgba(15,23,42,0.3)]' }}"
-                >
-                    {{ $labels['guest'] ?? 'Create Account to Subscribe' }}
-                </a>
+                @if (!$plan->price && !$plan->providerPrice($provider))
+                    <a
+                        href="{{ $guestUrl }}"
+                        class="block w-full rounded-xl px-4 py-3 text-center text-sm font-semibold tracking-wide text-white transition-all duration-300
+                            {{ $highlighted
+                                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 shadow-[0_10px_24px_rgba(99,102,241,0.38)] hover:from-indigo-500 hover:to-violet-500 hover:shadow-[0_14px_28px_rgba(99,102,241,0.46)]'
+                                : 'bg-slate-900 shadow-[0_8px_20px_rgba(15,23,42,0.24)] hover:bg-slate-800 hover:shadow-[0_10px_24px_rgba(15,23,42,0.3)]' }}"
+                    >
+                        {{ $labels['guest'] ?? 'Create Account to Subscribe' }}
+                    </a>
+                @else
+                    <form action="{{ route('subkit.checkout.redirect') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="plan_code"  value="{{ $plan->code }}">
+                        <input type="hidden" name="provider"    value="{{ $provider }}">
+                        <input type="hidden" name="success_url" value="{{ $successUrl }}">
+                        <input type="hidden" name="cancel_url"  value="{{ $cancelUrl }}">
+                        @if ($companyId)
+                            <input type="hidden" name="company_id" value="{{ $companyId }}">
+                        @endif
+                        <button
+                            type="{{ $successUrl === '#' ? 'button' : 'submit' }}"
+                            class="w-full rounded-xl px-4 py-3 text-sm font-semibold tracking-wide text-white transition-all duration-300
+                                {{ $highlighted
+                                    ? 'bg-gradient-to-r from-indigo-600 to-violet-600 shadow-[0_10px_24px_rgba(99,102,241,0.38)] hover:from-indigo-500 hover:to-violet-500 hover:shadow-[0_14px_28px_rgba(99,102,241,0.46)]'
+                                    : 'bg-slate-900 shadow-[0_8px_20px_rgba(15,23,42,0.24)] hover:bg-slate-800 hover:shadow-[0_10px_24px_rgba(15,23,42,0.3)]' }}"
+                        >
+                            {{ $labels['subscribe'] ?? 'Get Started' }}
+                        </button>
+                    </form>
+                @endif
             @endauth
         </div>
 

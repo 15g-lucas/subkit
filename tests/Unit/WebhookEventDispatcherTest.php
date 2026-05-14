@@ -239,6 +239,80 @@ class WebhookEventDispatcherTest extends TestCase
         Event::assertDispatched(SubscriptionCanceled::class, fn ($e) => $e->subscription === null);
     }
 
+    public function test_guest_checkout_completed_creates_user_from_billing_email(): void
+    {
+        (new WebhookEventDispatcher)->handle(
+            new WebhookHandled([
+                'type' => 'checkout.session.completed',
+                'data' => [
+                    'object' => [
+                        'id' => 'cs_test_123',
+                        'customer' => self::CUSTOMER_ID,
+                        'customer_details' => [
+                            'email' => 'guest@example.com',
+                            'name' => 'Jane Doe',
+                        ],
+                    ],
+                ],
+            ])
+        );
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'guest@example.com',
+            'stripe_id' => self::CUSTOMER_ID,
+            'name' => 'Jane Doe',
+        ]);
+    }
+
+    public function test_guest_checkout_user_can_receive_created_subscription_event(): void
+    {
+        (new WebhookEventDispatcher)->handle(
+            new WebhookHandled([
+                'type' => 'checkout.session.completed',
+                'data' => [
+                    'object' => [
+                        'id' => 'cs_test_123',
+                        'customer' => self::CUSTOMER_ID,
+                        'customer_details' => [
+                            'email' => 'guest-sub@example.com',
+                            'name' => 'John Guest',
+                        ],
+                    ],
+                ],
+            ])
+        );
+
+        Event::fake();
+
+        (new WebhookEventDispatcher)->handle(
+            new WebhookHandled([
+                'type' => 'customer.subscription.created',
+                'data' => [
+                    'object' => [
+                        'id' => self::SUBSCRIPTION_ID,
+                        'customer' => self::CUSTOMER_ID,
+                        'status' => 'active',
+                        'items' => [
+                            'data' => [[
+                                'price' => ['id' => 'price_guest'],
+                            ]],
+                        ],
+                    ],
+                ],
+            ])
+        );
+
+        $user = User::where('email', 'guest-sub@example.com')->firstOrFail();
+
+        Event::assertDispatched(SubscriptionCreated::class, fn ($e) => $e->user->id === $user->id);
+        $this->assertDatabaseHas('subscriptions', [
+            'user_id' => $user->id,
+            'stripe_id' => self::SUBSCRIPTION_ID,
+            'stripe_price' => 'price_guest',
+            'stripe_status' => 'active',
+        ]);
+    }
+
     // -------------------------------------------------------------------------
     // Unresolvable / unhandled cases
     // -------------------------------------------------------------------------
