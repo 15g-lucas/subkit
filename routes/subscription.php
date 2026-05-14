@@ -5,6 +5,7 @@ use SubKit\Http\Controllers\Api\CheckoutController;
 use SubKit\Http\Controllers\Api\SubscriptionController;
 use SubKit\Http\Controllers\BillingPortalController;
 use SubKit\Http\Controllers\CheckoutRedirectController;
+use SubKit\Http\Controllers\GuestCheckoutController;
 use SubKit\Http\Controllers\ManageSubscriptionsController;
 use SubKit\Http\Controllers\PlanSetPreviewController;
 
@@ -12,6 +13,9 @@ use SubKit\Http\Controllers\PlanSetPreviewController;
 Route::middleware(config('subkit.web.middleware', ['web']))
     ->name('subkit.')
     ->group(function () {
+        Route::get('subkit/guest-checkout/success', GuestCheckoutController::class)
+            ->name('guest-checkout.success');
+
         Route::post('subkit/checkout', CheckoutRedirectController::class)
             ->name('checkout.redirect');
 
