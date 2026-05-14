@@ -27,6 +27,7 @@ class StripeProvider implements PaymentProviderContract
         $installationFeeLabel = (string) ($options['installation_fee_label'] ?? 'Installation fee');
         unset($options['installation_fee'], $options['installation_fee_label']);
 
+        // These customer details must remain mandatory and must not be overridden by caller options.
         unset(
             $options['billing_address_collection'],
             $options['phone_number_collection'],
@@ -75,17 +76,13 @@ class StripeProvider implements PaymentProviderContract
         $checkoutPayload = array_merge($checkoutPayload, $this->requiredCustomerDetailsOptions());
 
         if ($installationFee > 0) {
-            $checkoutPayload['subscription_data'] = [
-                'add_invoice_items' => [[
-                    'price_data' => [
-                        'currency' => strtolower((string) config('subkit.currency.code', 'USD')),
-                        'unit_amount' => $installationFee,
-                        'product_data' => [
-                            'name' => $installationFeeLabel,
-                        ],
-                    ],
-                ]],
+            $checkoutPayload['line_items'] = $checkoutPayload['line_items'] ?? [
+                [
+                    'price' => $priceId,
+                    'quantity' => max(1, $quantity),
+                ],
             ];
+            $checkoutPayload['line_items'][] = $this->installationFeeLineItem($installationFee, $installationFeeLabel);
         }
 
         return $builder->checkout(array_merge($checkoutPayload, $options))->url;
@@ -122,15 +119,7 @@ class StripeProvider implements PaymentProviderContract
         }
 
         if ($installationFee > 0) {
-            $subscriptionData['add_invoice_items'] = [[
-                'price_data' => [
-                    'currency' => strtolower((string) config('subkit.currency.code', 'USD')),
-                    'unit_amount' => $installationFee,
-                    'product_data' => [
-                        'name' => $installationFeeLabel,
-                    ],
-                ],
-            ]];
+            $payload['line_items'][] = $this->installationFeeLineItem($installationFee, $installationFeeLabel);
         }
 
         if ($subscriptionData !== []) {
@@ -138,6 +127,23 @@ class StripeProvider implements PaymentProviderContract
         }
 
         return $payload;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function installationFeeLineItem(int $installationFee, string $installationFeeLabel): array
+    {
+        return [
+            'price_data' => [
+                'currency' => strtolower((string) config('subkit.currency.code', 'USD')),
+                'unit_amount' => $installationFee,
+                'product_data' => [
+                    'name' => $installationFeeLabel,
+                ],
+            ],
+            'quantity' => 1,
+        ];
     }
 
     /**

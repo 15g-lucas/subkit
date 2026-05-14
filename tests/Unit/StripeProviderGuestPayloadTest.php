@@ -46,7 +46,7 @@ class StripeProviderGuestPayloadTest extends TestCase
         $this->assertSame(5, $payload['line_items'][0]['quantity']);
     }
 
-    public function test_guest_payload_adds_installation_fee_as_invoice_item(): void
+    public function test_guest_payload_adds_installation_fee_as_one_time_line_item(): void
     {
         config(['subkit.currency.code' => 'EUR']);
 
@@ -85,18 +85,20 @@ class StripeProviderGuestPayloadTest extends TestCase
         );
 
         $this->assertSame(14, $payload['subscription_data']['trial_period_days']);
+        $this->assertCount(2, $payload['line_items']);
         $this->assertSame(
             4500,
-            $payload['subscription_data']['add_invoice_items'][0]['price_data']['unit_amount']
+            $payload['line_items'][1]['price_data']['unit_amount']
         );
         $this->assertSame(
             'eur',
-            $payload['subscription_data']['add_invoice_items'][0]['price_data']['currency']
+            $payload['line_items'][1]['price_data']['currency']
         );
         $this->assertSame(
             'Setup fee',
-            $payload['subscription_data']['add_invoice_items'][0]['price_data']['product_data']['name']
+            $payload['line_items'][1]['price_data']['product_data']['name']
         );
+        $this->assertSame(1, $payload['line_items'][1]['quantity']);
     }
 
     public function test_guest_payload_requires_customer_details_fields(): void
