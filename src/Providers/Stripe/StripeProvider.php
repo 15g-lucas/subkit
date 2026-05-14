@@ -3,6 +3,8 @@
 namespace SubKit\Providers\Stripe;
 
 use Illuminate\Database\Eloquent\Model;
+use RuntimeException;
+use Stripe\StripeClient;
 use SubKit\Contracts\PaymentProviderContract;
 
 class StripeProvider implements PaymentProviderContract
@@ -13,13 +15,41 @@ class StripeProvider implements PaymentProviderContract
     }
 
     public function createCheckoutSession(
-        Model $user,
+        ?Model $user,
         string $priceId,
         string $successUrl,
         string $cancelUrl,
         ?int $trialDays = null,
         array $options = [],
     ): string {
+        if (! $user) {
+            $secret = (string) config('cashier.secret');
+            if ($secret === '') {
+                throw new RuntimeException('Missing Stripe secret key for guest checkout.');
+            }
+
+            $payload = [
+                'mode' => 'subscription',
+                'line_items' => [[
+                    'price' => $priceId,
+                    'quantity' => 1,
+                ]],
+                'success_url' => $successUrl,
+                'cancel_url' => $cancelUrl,
+            ];
+
+            if ($trialDays > 0) {
+                $payload['subscription_data'] = ['trial_period_days' => $trialDays];
+            }
+
+            $session = (new StripeClient($secret))
+                ->checkout
+                ->sessions
+                ->create(array_merge($payload, $options));
+
+            return (string) $session->url;
+        }
+
         $builder = $user->newSubscription('default', $priceId);
 
         if ($trialDays > 0) {

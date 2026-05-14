@@ -117,12 +117,32 @@
     @else
         {{-- Guest --}}
         <div class="mt-6">
-            <a href="{{ $guestUrl }}"
-               class="block w-full rounded-lg px-4 py-2.5 text-center text-sm font-semibold text-white transition
-                   {{ $highlighted ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-800 hover:bg-gray-900' }}"
-            >
-                {{ $labels['guest'] ?? 'Create Account to Subscribe' }}
-            </a>
+            @if (!$plan->price && !$plan->providerPrice($provider))
+                <a href="{{ $guestUrl }}"
+                   class="block w-full rounded-lg px-4 py-2.5 text-center text-sm font-semibold text-white transition
+                       {{ $highlighted ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-800 hover:bg-gray-900' }}"
+                >
+                    {{ $labels['guest'] ?? 'Create Account to Subscribe' }}
+                </a>
+            @else
+                <form action="{{ route('subkit.checkout.redirect') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="plan_code"   value="{{ $plan->code }}">
+                    <input type="hidden" name="provider"     value="{{ $provider }}">
+                    <input type="hidden" name="success_url"  value="{{ $successUrl }}">
+                    <input type="hidden" name="cancel_url"   value="{{ $cancelUrl }}">
+                    @if ($companyId)
+                        <input type="hidden" name="company_id" value="{{ $companyId }}">
+                    @endif
+                    <button
+                        type="{{ $successUrl === '#' ? 'button' : 'submit' }}"
+                        class="w-full rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition
+                            {{ $highlighted ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-800 hover:bg-gray-900' }}"
+                    >
+                        {{ $labels['subscribe'] ?? 'Get Started' }}
+                    </button>
+                </form>
+            @endif
         </div>
     @endauth
 </div>

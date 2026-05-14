@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Facade;
 use SubKit\Services\SubscriptionService;
 
 /**
- * @method static string checkout(string $planCode, ?string $userId, string $successUrl, string $cancelUrl, string $provider = 'stripe', array $options = [])
+ * @method static string checkout(string $planCode, ?string $userId = null, string $successUrl = '', string $cancelUrl = '', string $provider = 'stripe', array $options = [])
  * @method static \Illuminate\Database\Eloquent\Collection forUser(string $userId)
  * @method static \Laravel\Cashier\Subscription|null activeForUser(string $userId)
  * @method static bool hasAccess(string $userId)
