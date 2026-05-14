@@ -146,7 +146,7 @@ class WebhookEventDispatcher
 
         /** @var Model $user */
         $user = new $userModel;
-        $fullName = $this->extractBillingName($payload, $stripeCustomerId) ?? Str::before($email, '@');
+        $fullName = $this->extractBillingName($payload, $stripeCustomerId) ?? 'Guest User';
         [$firstName, $lastName] = $this->splitName($fullName);
 
         $attributes = [
@@ -167,10 +167,6 @@ class WebhookEventDispatcher
         if (Schema::hasColumn($table, 'password')) {
             $attributes['password'] = Hash::make(Str::random(40));
         }
-        if (Schema::hasColumn($table, 'email_verified_at')) {
-            $attributes['email_verified_at'] = now();
-        }
-
         $user->forceFill($attributes);
         $user->save();
 
@@ -231,8 +227,13 @@ class WebhookEventDispatcher
 
     private function splitName(string $name): array
     {
-        $parts = preg_split('/\s+/', trim($name)) ?: [];
-        $first = $parts[0] ?? $name;
+        $normalized = trim($name);
+        if ($normalized === '') {
+            return ['Guest', 'User'];
+        }
+
+        $parts = preg_split('/\s+/', $normalized);
+        $first = $parts[0] ?? 'Guest';
         $last = count($parts) > 1 ? implode(' ', array_slice($parts, 1)) : '';
 
         return [$first, $last];

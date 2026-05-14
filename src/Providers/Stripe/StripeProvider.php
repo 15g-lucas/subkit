@@ -38,7 +38,7 @@ class StripeProvider implements PaymentProviderContract
                 'cancel_url' => $cancelUrl,
             ];
 
-            if ($trialDays > 0) {
+            if ($trialDays !== null && $trialDays > 0) {
                 $payload['subscription_data'] = ['trial_period_days' => $trialDays];
             }
 
@@ -52,7 +52,7 @@ class StripeProvider implements PaymentProviderContract
 
         $builder = $user->newSubscription('default', $priceId);
 
-        if ($trialDays > 0) {
+        if ($trialDays !== null && $trialDays > 0) {
             $builder->trialDays($trialDays);
         }
 
