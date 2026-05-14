@@ -76,12 +76,8 @@ class StripeProvider implements PaymentProviderContract
         $checkoutPayload = array_merge($checkoutPayload, $this->requiredCustomerDetailsOptions());
 
         if ($installationFee > 0) {
-            $checkoutPayload['line_items'] = $checkoutPayload['line_items'] ?? [
-                [
-                    'price' => $priceId,
-                    'quantity' => max(1, $quantity),
-                ],
-            ];
+            // Cashier already carries the recurring subscription price; keep line_items for one-time extras only.
+            $checkoutPayload['line_items'] = $checkoutPayload['line_items'] ?? [];
             $checkoutPayload['line_items'][] = $this->installationFeeLineItem($installationFee, $installationFeeLabel);
         }
 
