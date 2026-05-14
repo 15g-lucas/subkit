@@ -7,6 +7,7 @@ return [
         'per_year' => '/year',
         'per_month' => '/month',
         'recommended' => 'Recommended',
+        'quantity' => 'Quantity',
     ],
     'buttons' => [
         'get_started' => 'Get Started',

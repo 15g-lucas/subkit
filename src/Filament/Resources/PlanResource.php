@@ -97,6 +97,11 @@ class PlanResource extends Resource
                         ->label('Active')
                         ->default(true)
                         ->helperText('Only active plans appear in the pricing table.'),
+
+                    Toggle::make('has_quantity')
+                        ->label('Quantity-based')
+                        ->default(false)
+                        ->helperText('Allow users to choose a quantity at checkout. The total price will be unit price × quantity.'),
                 ]),
 
             Section::make('Description')

@@ -22,6 +22,7 @@ interface PaymentProviderContract
         string $successUrl,
         string $cancelUrl,
         ?int $trialDays = null,
+        int $quantity = 1,
         array $options = [],
     ): string;
 

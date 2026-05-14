@@ -18,12 +18,17 @@ class StripeProvider implements PaymentProviderContract
         string $successUrl,
         string $cancelUrl,
         ?int $trialDays = null,
+        int $quantity = 1,
         array $options = [],
     ): string {
         $builder = $user->newSubscription('default', $priceId);
 
         if ($trialDays > 0) {
             $builder->trialDays($trialDays);
+        }
+
+        if ($quantity > 1) {
+            $builder->quantity($quantity);
         }
 
         return $builder->checkout(array_merge([
