@@ -35,6 +35,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Guest Checkout
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for checkout sessions initiated by unauthenticated users.
+    | When a guest completes payment on Stripe, they are redirected to the
+    | 'subkit.guest-checkout.success' route, which then forwards them here.
+    |
+    | Set 'success_url' to a named route or absolute URL (e.g. '/thank-you').
+    |
+    */
+
+    'guest_checkout' => [
+        'success_url' => env('SUBKIT_GUEST_CHECKOUT_SUCCESS_URL', '/'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Web Middleware (pricing table checkout redirect)
     |--------------------------------------------------------------------------
     */
