@@ -27,6 +27,13 @@ class StripeProvider implements PaymentProviderContract
         $installationFeeLabel = (string) ($options['installation_fee_label'] ?? 'Installation fee');
         unset($options['installation_fee'], $options['installation_fee_label']);
 
+        // These customer details must remain mandatory and must not be overridden by caller options.
+        unset(
+            $options['billing_address_collection'],
+            $options['phone_number_collection'],
+            $options['custom_fields']
+        );
+
         if (! $user) {
             $secret = (string) config('cashier.secret');
             if ($secret === '') {
@@ -46,7 +53,7 @@ class StripeProvider implements PaymentProviderContract
             $session = (new StripeClient($secret))
                 ->checkout
                 ->sessions
-                ->create(array_merge($payload, $options));
+                ->create(array_merge($payload, $this->requiredCustomerDetailsOptions(), $options));
 
             return (string) $session->url;
         }
@@ -66,18 +73,12 @@ class StripeProvider implements PaymentProviderContract
             'cancel_url' => $cancelUrl,
         ];
 
+        $checkoutPayload = array_merge($checkoutPayload, $this->requiredCustomerDetailsOptions());
+
         if ($installationFee > 0) {
-            $checkoutPayload['subscription_data'] = [
-                'add_invoice_items' => [[
-                    'price_data' => [
-                        'currency' => strtolower((string) config('subkit.currency.code', 'USD')),
-                        'unit_amount' => $installationFee,
-                        'product_data' => [
-                            'name' => $installationFeeLabel,
-                        ],
-                    ],
-                ]],
-            ];
+            // Cashier already carries the recurring subscription price; keep line_items for one-time extras only.
+            $checkoutPayload['line_items'] = $checkoutPayload['line_items'] ?? [];
+            $checkoutPayload['line_items'][] = $this->installationFeeLineItem($installationFee, $installationFeeLabel);
         }
 
         return $builder->checkout(array_merge($checkoutPayload, $options))->url;
@@ -105,6 +106,8 @@ class StripeProvider implements PaymentProviderContract
             'cancel_url' => $cancelUrl,
         ];
 
+        $payload = array_merge($payload, $this->requiredCustomerDetailsOptions());
+
         $subscriptionData = [];
 
         if ($trialDays !== null && $trialDays > 0) {
@@ -112,15 +115,7 @@ class StripeProvider implements PaymentProviderContract
         }
 
         if ($installationFee > 0) {
-            $subscriptionData['add_invoice_items'] = [[
-                'price_data' => [
-                    'currency' => strtolower((string) config('subkit.currency.code', 'USD')),
-                    'unit_amount' => $installationFee,
-                    'product_data' => [
-                        'name' => $installationFeeLabel,
-                    ],
-                ],
-            ]];
+            $payload['line_items'][] = $this->installationFeeLineItem($installationFee, $installationFeeLabel);
         }
 
         if ($subscriptionData !== []) {
@@ -128,6 +123,63 @@ class StripeProvider implements PaymentProviderContract
         }
 
         return $payload;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function installationFeeLineItem(int $installationFee, string $installationFeeLabel): array
+    {
+        return [
+            'price_data' => [
+                'currency' => strtolower((string) config('subkit.currency.code', 'USD')),
+                'unit_amount' => $installationFee,
+                'product_data' => [
+                    'name' => $installationFeeLabel,
+                ],
+            ],
+            'quantity' => 1,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function requiredCustomerDetailsOptions(): array
+    {
+        return [
+            'billing_address_collection' => 'required',
+            'phone_number_collection' => ['enabled' => true],
+            'custom_fields' => [
+                [
+                    'key' => 'first_name',
+                    'label' => [
+                        'type' => 'custom',
+                        'custom' => __('subkit::messages.checkout.first_name'),
+                    ],
+                    'type' => 'text',
+                    'optional' => false,
+                ],
+                [
+                    'key' => 'last_name',
+                    'label' => [
+                        'type' => 'custom',
+                        'custom' => __('subkit::messages.checkout.last_name'),
+                    ],
+                    'type' => 'text',
+                    'optional' => false,
+                ],
+                [
+                    'key' => 'company_name',
+                    'label' => [
+                        'type' => 'custom',
+                        'custom' => __('subkit::messages.checkout.company_name'),
+                    ],
+                    'type' => 'text',
+                    'optional' => false,
+                ],
+            ],
+        ];
     }
 
     public function cancelSubscription(Model $user, bool $immediately = false): void
