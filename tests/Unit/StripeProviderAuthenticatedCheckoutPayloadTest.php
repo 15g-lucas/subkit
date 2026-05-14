@@ -14,9 +14,6 @@ class StripeProviderAuthenticatedCheckoutPayloadTest extends TestCase
 
         $builder = new class($capturedCheckoutPayload)
         {
-            /** @var array<string, mixed>|null */
-            public ?array $checkoutPayload = null;
-
             public ?int $trialDaysSet = null;
 
             public ?int $quantitySet = null;
@@ -45,7 +42,6 @@ class StripeProviderAuthenticatedCheckoutPayloadTest extends TestCase
 
             public function checkout(array $payload): object
             {
-                $this->checkoutPayload = $payload;
                 $this->capturedCheckoutPayload = $payload;
 
                 return (object) ['url' => 'https://checkout.test/session'];
