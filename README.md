@@ -175,7 +175,9 @@ With a plan set (for multiple landing pages or A/B testing):
 | `free-label` | `string\|null` | `null` | Override the "Get Started Free" button text.                                          |
 | `guest-label` | `string\|null` | `null` | Override the "Create Account to Subscribe" button text.                               |
 
-URL props accept a **route name** (e.g. `'dashboard'`), a **relative path** (e.g. `'/thanks?utm_source=fb'`), or a **full URL**. Route names are resolved automatically. Success URLs that stay on the same scheme, host, and port as your application are signed before checkout so you can guard the destination page with Laravel's `signed` middleware. URLs set in the admin panel (per Plan Set) serve as defaults when the prop is omitted.
+URL props accept a **route name** (e.g. `'dashboard'`), a **relative path** (e.g. `'/thanks?utm_source=fb'`), or a **full URL**. Route names are resolved automatically.
+
+Success URLs that stay on the same scheme, host, and port as your application are signed before checkout. That lets you guard the destination page with Laravel's `signed` middleware. URLs set in the admin panel (per Plan Set) serve as defaults when the prop is omitted.
 
 For the best UX, point **Free Plan URL** to a route that automatically creates a $0 subscription for the authenticated user.
 

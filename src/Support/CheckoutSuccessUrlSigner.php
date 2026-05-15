@@ -34,7 +34,12 @@ class CheckoutSuccessUrlSigner
             return $url;
         }
 
-        parse_str($queryString, $query);
+        $query = $this->parseQueryParameters($queryString);
+
+        if ($query === null) {
+            return $url;
+        }
+
         unset($query['signature']);
 
         $baseUrl = $this->baseUrl($parts);
@@ -63,7 +68,11 @@ class CheckoutSuccessUrlSigner
             return false;
         }
 
-        parse_str($query, $parameters);
+        $parameters = $this->parseQueryParameters($query);
+
+        if ($parameters === null) {
+            return false;
+        }
 
         return array_key_exists('signature', $parameters);
     }
@@ -98,5 +107,39 @@ class CheckoutSuccessUrlSigner
     private function signingKey(): string
     {
         return (string) config('app.key');
+    }
+
+    /**
+     * @return array<string, string>|null
+     */
+    private function parseQueryParameters(string $queryString): ?array
+    {
+        if ($queryString === '') {
+            return [];
+        }
+
+        $parameters = [];
+
+        foreach (explode('&', $queryString) as $segment) {
+            if ($segment === '') {
+                continue;
+            }
+
+            [$rawKey, $rawValue] = array_pad(explode('=', $segment, 2), 2, '');
+            $key = rawurldecode($rawKey);
+
+            if (
+                $key === ''
+                || str_contains($key, '[')
+                || str_contains($key, ']')
+                || array_key_exists($key, $parameters)
+            ) {
+                return null;
+            }
+
+            $parameters[$key] = rawurldecode($rawValue);
+        }
+
+        return $parameters;
     }
 }
