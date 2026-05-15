@@ -4,6 +4,9 @@ namespace SubKit\Support;
 
 class CheckoutSuccessUrlSigner
 {
+    /** Avoid parsing unusually large query strings when normalizing signed URLs. */
+    private const MAX_QUERY_STRING_LENGTH = 2048;
+
     public function sign(string $url): string
     {
         if (
@@ -27,7 +30,7 @@ class CheckoutSuccessUrlSigner
 
         $queryString = (string) ($parts['query'] ?? '');
 
-        if (strlen($queryString) > 2048) {
+        if (strlen($queryString) > self::MAX_QUERY_STRING_LENGTH) {
             return $url;
         }
 
