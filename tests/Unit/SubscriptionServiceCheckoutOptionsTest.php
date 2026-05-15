@@ -3,6 +3,8 @@
 namespace Tests\Unit;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 use SubKit\Contracts\PaymentProviderContract;
 use SubKit\Models\Plan;
 use SubKit\Models\PlanProviderPrice;
@@ -13,13 +15,13 @@ use Tests\TestCase;
 class SubscriptionServiceCheckoutOptionsTest extends TestCase
 {
     /**
-     * @return array{url: string, quantity: int, options: array<string, mixed>}|null
+     * @return array{url: string, quantity: int, options: array<string, mixed>, success_url: string}|null
      */
-    private function checkoutForPlan(Plan $plan, int $requestedQuantity): ?array
+    private function checkoutForPlan(Plan $plan, int $requestedQuantity, string $successUrl = 'https://example.com/success'): ?array
     {
         $provider = new class implements PaymentProviderContract
         {
-            /** @var array{url: string, quantity: int, options: array<string, mixed>}|null */
+            /** @var array{url: string, quantity: int, options: array<string, mixed>, success_url: string}|null */
             public ?array $captured = null;
 
             public function name(): string
@@ -40,6 +42,7 @@ class SubscriptionServiceCheckoutOptionsTest extends TestCase
                     'url' => 'https://checkout.test/session',
                     'quantity' => $quantity,
                     'options' => $options,
+                    'success_url' => $successUrl,
                 ];
 
                 return $this->captured['url'];
@@ -68,7 +71,7 @@ class SubscriptionServiceCheckoutOptionsTest extends TestCase
         $service->checkout(
             planCode: $plan->code,
             userId: null,
-            successUrl: 'https://example.com/success',
+            successUrl: $successUrl,
             cancelUrl: 'https://example.com/cancel',
             quantity: $requestedQuantity,
         );
@@ -130,5 +133,64 @@ class SubscriptionServiceCheckoutOptionsTest extends TestCase
         $this->assertNotNull($captured);
         $this->assertSame(2500, $captured['options']['installation_fee']);
         $this->assertArrayHasKey('installation_fee_label', $captured['options']);
+    }
+
+    public function test_checkout_signs_local_success_urls(): void
+    {
+        config(['app.key' => 'base64:'.base64_encode(str_repeat('a', 32))]);
+
+        $plan = Plan::create([
+            'code' => 'growth',
+            'name' => 'Growth',
+            'interval' => 'monthly',
+            'price' => 4900,
+            'has_quantity' => false,
+            'is_active' => true,
+            'version' => 1,
+        ]);
+
+        $captured = $this->checkoutForPlan($plan, requestedQuantity: 1, successUrl: url('/success'));
+
+        $this->assertNotNull($captured);
+        $this->assertStringContainsString('signature=', $captured['success_url']);
+        $this->assertTrue(URL::hasValidSignature(Request::create($captured['success_url'])));
+    }
+
+    public function test_checkout_does_not_sign_success_urls_with_stripe_placeholders(): void
+    {
+        $plan = Plan::create([
+            'code' => 'startup',
+            'name' => 'Startup',
+            'interval' => 'monthly',
+            'price' => 1900,
+            'has_quantity' => false,
+            'is_active' => true,
+            'version' => 1,
+        ]);
+
+        $successUrl = url('/success?session_id={CHECKOUT_SESSION_ID}');
+        $captured = $this->checkoutForPlan($plan, requestedQuantity: 1, successUrl: $successUrl);
+
+        $this->assertNotNull($captured);
+        $this->assertSame($successUrl, $captured['success_url']);
+    }
+
+    public function test_checkout_does_not_sign_external_success_urls(): void
+    {
+        $plan = Plan::create([
+            'code' => 'scale',
+            'name' => 'Scale',
+            'interval' => 'monthly',
+            'price' => 7900,
+            'has_quantity' => false,
+            'is_active' => true,
+            'version' => 1,
+        ]);
+
+        $successUrl = 'https://external.example.com/success';
+        $captured = $this->checkoutForPlan($plan, requestedQuantity: 1, successUrl: $successUrl);
+
+        $this->assertNotNull($captured);
+        $this->assertSame($successUrl, $captured['success_url']);
     }
 }

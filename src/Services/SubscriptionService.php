@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Laravel\Cashier\Subscription as CashierSubscription;
 use RuntimeException;
 use SubKit\Models\Plan;
+use SubKit\Support\CheckoutSuccessUrlSigner;
 
 class SubscriptionService
 {
@@ -46,6 +47,8 @@ class SubscriptionService
             $options['installation_fee'] = (int) $plan->installation_fee;
             $options['installation_fee_label'] = "Installation fee ({$plan->name})";
         }
+
+        $successUrl = app(CheckoutSuccessUrlSigner::class)->sign($successUrl);
 
         return $this->registry->resolve($provider)->createCheckoutSession(
             user: $user,
