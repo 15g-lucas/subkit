@@ -43,7 +43,7 @@ class CheckoutSuccessUrlSigner
 
     private function containsProviderPlaceholder(string $url): bool
     {
-        return str_contains($url, '{CHECKOUT_SESSION_ID}');
+        return preg_match('/\{[A-Z0-9_]+\}/', $url) === 1;
     }
 
     private function alreadySigned(string $url): bool
