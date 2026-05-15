@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class GuestCheckoutSuccessRouteTest extends TestCase
@@ -29,5 +30,41 @@ class GuestCheckoutSuccessRouteTest extends TestCase
         $response = $this->get(route('subkit.guest-checkout.success'));
 
         $response->assertRedirect('/');
+    }
+
+    public function test_signed_redirect_param_is_followed(): void
+    {
+        $signedUrl = URL::temporarySignedRoute(
+            'subkit.guest-checkout.success',
+            now()->addHours(24),
+            ['redirect' => '/paid-success'],
+        );
+
+        $response = $this->get($signedUrl);
+
+        $response->assertRedirect('/paid-success');
+    }
+
+    public function test_invalid_signature_with_redirect_param_returns_403(): void
+    {
+        $url = route('subkit.guest-checkout.success', ['redirect' => '/paid-success'])
+            .'&signature=invalidsignature';
+
+        $response = $this->get($url);
+
+        $response->assertForbidden();
+    }
+
+    public function test_expired_signature_with_redirect_param_returns_403(): void
+    {
+        $expiredUrl = URL::temporarySignedRoute(
+            'subkit.guest-checkout.success',
+            now()->subMinutes(1),
+            ['redirect' => '/paid-success'],
+        );
+
+        $response = $this->get($expiredUrl);
+
+        $response->assertForbidden();
     }
 }
