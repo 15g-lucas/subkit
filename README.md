@@ -166,7 +166,7 @@ With a plan set (for multiple landing pages or A/B testing):
 | `set` | `string\|null` | `null` | Plan set code. If omitted, shows all active plans.                                    |
 | `theme` | `string\|null` | `'default'` | UI theme (`default`, `dark`, `light`, or a custom theme).                             |
 | `provider` | `string` | `'stripe'` | Payment provider.                                                                     |
-| `success-url` | `string` | `''` | Redirect after successful checkout. Local URLs are signed automatically. |
+| `success-url` | `string` | `''` | Redirect after successful checkout. Same-app URLs are signed automatically. |
 | `cancel-url` | `string` | `''` | Redirect when the user cancels checkout.                                              |
 | `free-url` | `string` | `''` | CTA destination for $0 plans (authenticated users).                                   |
 | `guest-redirect-url` | `string\|null` | `null` | Where unauthenticated visitors are sent for free plans. Defaults to `/register`.       |
@@ -175,7 +175,7 @@ With a plan set (for multiple landing pages or A/B testing):
 | `free-label` | `string\|null` | `null` | Override the "Get Started Free" button text.                                          |
 | `guest-label` | `string\|null` | `null` | Override the "Create Account to Subscribe" button text.                               |
 
-URL props accept a **route name** (e.g. `'dashboard'`), a **relative path** (e.g. `'/thanks?utm_source=fb'`), or a **full URL**. Route names are resolved automatically. Local success URLs are signed before checkout so you can guard the destination page with Laravel's `signed` middleware. URLs set in the admin panel (per Plan Set) serve as defaults when the prop is omitted.
+URL props accept a **route name** (e.g. `'dashboard'`), a **relative path** (e.g. `'/thanks?utm_source=fb'`), or a **full URL**. Route names are resolved automatically. Success URLs that stay on the same scheme, host, and port as your application are signed before checkout so you can guard the destination page with Laravel's `signed` middleware. URLs set in the admin panel (per Plan Set) serve as defaults when the prop is omitted.
 
 For the best UX, point **Free Plan URL** to a route that automatically creates a $0 subscription for the authenticated user.
 
