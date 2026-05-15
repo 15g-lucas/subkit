@@ -42,6 +42,10 @@ class SubscriberResource extends Resource
                     ->sortable()
                     ->placeholder('—'),
 
+                TextColumn::make('quantity')
+                    ->label('Quantity')
+                    ->placeholder('—'),
+
                 TextColumn::make('stripe_price')
                     ->label('Plan')
                     ->formatStateUsing(function (string $state): string {

@@ -150,4 +150,38 @@ class CheckoutSuccessUrlSigner
 
         return $parameters;
     }
+
+    public function verify(string $url): bool
+    {
+        $urlWithoutFragment = strtok($url, '#') ?: $url;
+        $parts = parse_url($urlWithoutFragment);
+
+        if ($parts === false) {
+            return false;
+        }
+
+        $queryString = (string) ($parts['query'] ?? '');
+
+        if (strlen($queryString) > self::MAX_QUERY_STRING_LENGTH) {
+            return false;
+        }
+
+        $query = $this->parseQueryParameters($queryString);
+
+        if ($query === null || ! array_key_exists('signature', $query)) {
+            return false;
+        }
+
+        $receivedSignature = $query['signature'];
+
+        unset($query['signature']);
+
+        $baseUrl = $this->baseUrl($parts);
+        $normalizedQuery = http_build_query($query);
+        $unsignedUrl = $normalizedQuery === '' ? $baseUrl : "{$baseUrl}?{$normalizedQuery}";
+
+        $expectedSignature = hash_hmac('sha256', $unsignedUrl, $this->signingKey());
+
+        return hash_equals($expectedSignature, $receivedSignature);
+    }
 }
