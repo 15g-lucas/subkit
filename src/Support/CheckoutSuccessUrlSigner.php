@@ -25,14 +25,20 @@ class CheckoutSuccessUrlSigner
             return $url;
         }
 
-        parse_str($parts['query'] ?? '', $query);
+        $queryString = (string) ($parts['query'] ?? '');
+
+        if (strlen($queryString) > 2048) {
+            return $url;
+        }
+
+        parse_str($queryString, $query);
         unset($query['signature']);
 
         $baseUrl = $this->baseUrl($parts);
-        $queryString = http_build_query($query);
-        $unsignedUrl = $queryString === '' ? $baseUrl : "{$baseUrl}?{$queryString}";
+        $normalizedQuery = http_build_query($query);
+        $unsignedUrl = $normalizedQuery === '' ? $baseUrl : "{$baseUrl}?{$normalizedQuery}";
         $signature = hash_hmac('sha256', $unsignedUrl, $this->signingKey());
-        $signedUrl = "{$unsignedUrl}".($queryString === '' ? '?' : '&')."signature={$signature}";
+        $signedUrl = "{$unsignedUrl}".($normalizedQuery === '' ? '?' : '&')."signature={$signature}";
 
         if (! is_string($fragment) || $fragment === '') {
             return $signedUrl;
