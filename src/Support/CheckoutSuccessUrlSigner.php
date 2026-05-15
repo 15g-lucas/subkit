@@ -57,7 +57,7 @@ class CheckoutSuccessUrlSigner
 
     private function containsProviderPlaceholder(string $url): bool
     {
-        return preg_match('/\{[A-Za-z0-9_]+\}/', $url) === 1;
+        return preg_match('/\{[A-Za-z0-9_-]+\}/', $url) === 1;
     }
 
     private function alreadySigned(string $url): bool
@@ -125,7 +125,13 @@ class CheckoutSuccessUrlSigner
                 continue;
             }
 
-            [$rawKey, $rawValue] = array_pad(explode('=', $segment, 2), 2, '');
+            if (str_contains($segment, '=')) {
+                [$rawKey, $rawValue] = explode('=', $segment, 2);
+            } else {
+                $rawKey = $segment;
+                $rawValue = '';
+            }
+
             $key = rawurldecode($rawKey);
 
             if (
