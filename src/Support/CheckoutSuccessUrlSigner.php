@@ -57,6 +57,7 @@ class CheckoutSuccessUrlSigner
 
     private function containsProviderPlaceholder(string $url): bool
     {
+        // Allow both CHECKOUT_SESSION_ID and CHECKOUT-SESSION-ID style placeholders.
         return preg_match('/\{[A-Za-z0-9_-]+\}/', $url) === 1;
     }
 
@@ -114,6 +115,7 @@ class CheckoutSuccessUrlSigner
      */
     private function parseQueryParameters(string $queryString): ?array
     {
+        // Use a flat parser so duplicate keys and array-style parameters can be rejected.
         if ($queryString === '') {
             return [];
         }
