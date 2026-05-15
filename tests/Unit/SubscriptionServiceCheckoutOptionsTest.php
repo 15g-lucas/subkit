@@ -137,7 +137,7 @@ class SubscriptionServiceCheckoutOptionsTest extends TestCase
 
     public function test_checkout_signs_local_success_urls(): void
     {
-        config(['app.key' => 'subkit-unit-test-signing-key']);
+        config(['app.key' => 'base64:'.base64_encode(str_repeat('a', 32))]);
 
         $plan = Plan::create([
             'code' => 'growth',
