@@ -5,6 +5,7 @@ namespace SubKit\Services;
 use Functional\Users\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\URL;
 use Laravel\Cashier\Subscription as CashierSubscription;
 use RuntimeException;
 use SubKit\Models\Plan;
@@ -47,10 +48,16 @@ class SubscriptionService
             $options['installation_fee_label'] = "Installation fee ({$plan->name})";
         }
 
+        $signedSuccessUrl = URL::temporarySignedRoute(
+            'subkit.guest-checkout.success',
+            now()->addHours(24),
+            ['redirect' => $successUrl],
+        );
+
         return $this->registry->resolve($provider)->createCheckoutSession(
             user: $user,
             priceId: $providerPrice->provider_price_id,
-            successUrl: $successUrl,
+            successUrl: $signedSuccessUrl,
             cancelUrl: $cancelUrl,
             trialDays: $plan->trial_days,
             quantity: $resolvedQuantity,
