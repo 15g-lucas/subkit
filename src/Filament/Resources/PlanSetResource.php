@@ -111,7 +111,7 @@ class PlanSetResource extends Resource
                         ->label('Success URL')
                         ->maxLength(500)
                         ->placeholder("'dashboard', '/thanks?utm=fb', or 'https://…'")
-                        ->helperText('Redirect here after a successful checkout.'),
+                        ->helperText('Redirect here after a successful checkout. Local URLs are signed automatically so you can protect the page with Laravel\'s signed middleware.'),
 
                     TextInput::make('cancel_url')
                         ->label('Cancel URL')
